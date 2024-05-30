@@ -1,8 +1,9 @@
-/// Contains the general information about module
-#[repr(C)]
-pub struct ModuleInfo {
-    /// Human-readable name
-    pub name: String,
-    /// ID to use as a reference in pipeline config
-    pub ref_id: String,
+pub enum ModuleType {
+    Source,
+    Transofmation,
+    Destination,
+}
+
+pub struct Module {
+    pub module_type: ModuleType,
 }
