@@ -1,9 +1,4 @@
-// pub enum ModuleType {
-//     Source,
-//     Transofmation,
-//     Destination,
-// }
-
+#[derive(Clone, PartialEq, Debug)]
 pub enum IoKind {
     Batch,
     /// Defines a module as source if set to input.
@@ -12,8 +7,12 @@ pub enum IoKind {
     Stream,
 }
 
+#[derive(Clone)]
 pub struct Module {
-    // pub module_type: ModuleType,
+    pub id: String,
+    pub name: String,
     pub input_kind: IoKind,
     pub output_kind: IoKind,
+
+    pub init: extern fn(),
 }
