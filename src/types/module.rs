@@ -14,5 +14,5 @@ pub struct Module {
     pub input_kind: IoKind,
     pub output_kind: IoKind,
 
-    pub init: extern fn(),
+    pub init: extern fn(extern fn()),
 }

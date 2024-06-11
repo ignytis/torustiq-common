@@ -1,5 +1,5 @@
 use crate::ffi::types::{
-    std::ConstCharPtr,
+    std_types::ConstCharPtr,
     module::Module
 };
 

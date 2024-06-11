@@ -1,5 +1,5 @@
 use crate::{
-    ffi::{types::std, utils::strings},
+    ffi::{types::std_types, utils::strings},
     types::module::{Module as RustModule, IoKind as RustIoKind},
 };
 
@@ -25,26 +25,23 @@ impl Into<RustIoKind> for IoKind {
 /// A module returned by dynamic link library
 #[repr(C)]
 pub struct Module {
-    pub id: std::ConstCharPtr,
-    pub name: std::ConstCharPtr,
+    pub id: std_types::ConstCharPtr,
+    pub name: std_types::ConstCharPtr,
     pub input_kind: IoKind,
     pub output_kind: IoKind,
 
-    pub init: extern "C" fn(),
+    pub init: extern "C" fn(extern "C" fn()),
 }
 
 impl Into<RustModule> for Module {
     fn into(self) -> RustModule {
-        (self.init)();
-        let m = RustModule {
+        RustModule {
             id: strings::cchar_to_string(self.id),
             name: strings::cchar_to_string(self.name),
             input_kind: self.input_kind.into(),
             output_kind: self.output_kind.into(),
 
             init: self.init,
-        };
-        (m.init)();
-        m
+        }
     }
 }
