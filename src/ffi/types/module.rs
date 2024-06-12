@@ -1,8 +1,6 @@
-use crate::{
-    ffi::{types::std_types, utils::strings},
-    types::module::{Module as RustModule, IoKind as RustIoKind},
-};
+use crate::ffi::types::std_types;
 
+#[derive(Clone, Debug, PartialEq)]
 #[repr(C)]
 pub enum IoKind {
     Batch,
@@ -12,17 +10,8 @@ pub enum IoKind {
     Stream,
 }
 
-impl Into<RustIoKind> for IoKind {
-    fn into(self) -> RustIoKind {
-        match self {
-            Self::Batch => RustIoKind::Batch,
-            Self::External => RustIoKind::External,
-            Self::Stream => RustIoKind::Stream,
-        }
-    }
-}
-
 /// A module returned by dynamic link library
+#[derive(Clone)]
 #[repr(C)]
 pub struct Module {
     pub id: std_types::ConstCharPtr,
@@ -30,18 +19,11 @@ pub struct Module {
     pub input_kind: IoKind,
     pub output_kind: IoKind,
 
-    pub init: extern "C" fn(extern "C" fn()),
+    pub init: extern "C" fn(ModuleInitArgs),
 }
 
-impl Into<RustModule> for Module {
-    fn into(self) -> RustModule {
-        RustModule {
-            id: strings::cchar_to_string(self.id),
-            name: strings::cchar_to_string(self.name),
-            input_kind: self.input_kind.into(),
-            output_kind: self.output_kind.into(),
-
-            init: self.init,
-        }
-    }
+/// Arguments passed to init function
+#[repr(C)]
+pub struct ModuleInitArgs {
+    pub termination_handler: extern "C" fn(),
 }
