@@ -10,20 +10,18 @@ pub enum IoKind {
     Stream,
 }
 
-/// A module returned by dynamic link library
+/// Module information
 #[derive(Clone)]
 #[repr(C)]
-pub struct Module {
+pub struct ModuleInfo {
     pub id: std_types::ConstCharPtr,
     pub name: std_types::ConstCharPtr,
     pub input_kind: IoKind,
     pub output_kind: IoKind,
-
-    pub init: extern "C" fn(ModuleInitArgs),
 }
 
 /// Arguments passed to init function
 #[repr(C)]
-pub struct ModuleInitArgs {
+pub struct ModuleInitStepArgs {
     pub termination_handler: extern "C" fn(),
 }

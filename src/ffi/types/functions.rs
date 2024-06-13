@@ -1,7 +1,7 @@
 use crate::ffi::types::{
     std_types::ConstCharPtr,
-    module::Module
+    module::ModuleInfo,
 };
 
-pub type GetIdFn = unsafe extern fn() -> ConstCharPtr;
-pub type LoadFn = unsafe extern fn() -> Module;
+pub type ModuleGetInfoFn = unsafe extern fn() -> ModuleInfo;
+// pub type LoadFn = unsafe extern fn() -> ModuleInfo;
