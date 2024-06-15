@@ -23,5 +23,6 @@ pub struct ModuleInfo {
 /// Arguments passed to init function
 #[repr(C)]
 pub struct ModuleInitStepArgs {
-    pub termination_handler: extern "C" fn(),
+    pub step_handle: std_types::Uint,
+    pub termination_handler: extern "C" fn(std_types::Uint),
 }
