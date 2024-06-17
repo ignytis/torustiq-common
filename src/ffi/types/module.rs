@@ -1,5 +1,9 @@
 use crate::ffi::types::std_types;
 
+use super::functions::{
+    ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
+};
+
 #[derive(Clone, Debug, PartialEq)]
 #[repr(C)]
 pub enum IoKind {
@@ -24,5 +28,7 @@ pub struct ModuleInfo {
 #[repr(C)]
 pub struct ModuleInitStepArgs {
     pub step_handle: std_types::Uint,
-    pub termination_handler: extern "C" fn(std_types::Uint),
+    pub termination_handler: ModuleTerminationHandlerFn,
+
+    pub on_data_received_fn: ModuleOnDataReceivedFn,
 }
