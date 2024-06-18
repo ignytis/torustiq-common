@@ -1,8 +1,8 @@
 use crate::ffi::types::std_types;
 
-use super::functions::{
+use super::{buffer::ByteBuffer, functions::{
     ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
-};
+}};
 
 #[derive(Clone, Debug, PartialEq)]
 #[repr(C)]
@@ -31,4 +31,11 @@ pub struct ModuleInitStepArgs {
     pub termination_handler: ModuleTerminationHandlerFn,
 
     pub on_data_received_fn: ModuleOnDataReceivedFn,
+}
+
+/// A single piece of data to transmit. Contains the data itself + metadata
+/// TODO: add metadata
+#[repr(C)]
+pub struct Record {
+    pub content: ByteBuffer,
 }

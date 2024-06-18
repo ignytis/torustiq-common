@@ -1,11 +1,11 @@
 use crate::ffi::types::module::ModuleInfo;
 
-use super::{module::ModuleInitStepArgs, std_types};
+use super::{module::{ModuleInitStepArgs, Record}, std_types};
 
 // TODO: add the payload size and use it in string initialization. 
 // Null-terminated strings are most likely not safe, as we can receive the binary data
 // Perhaps should use arrays of numbers instead?
-pub type ModuleOnDataReceivedFn = extern fn(std_types::ConstCharPtr);
+pub type ModuleOnDataReceivedFn = extern fn(Record);
 
 pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
 pub type ModuleInitStepFn = extern fn(ModuleInitStepArgs);
