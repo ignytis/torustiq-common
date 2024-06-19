@@ -27,7 +27,7 @@ pub struct ModuleInfo {
 /// Arguments passed to init function
 #[repr(C)]
 pub struct ModuleInitStepArgs {
-    pub step_handle: std_types::Uint,
+    pub step_handle: ModuleStepHandle,
     pub termination_handler: ModuleTerminationHandlerFn,
 
     pub on_data_received_fn: ModuleOnDataReceivedFn,
@@ -38,4 +38,14 @@ pub struct ModuleInitStepArgs {
 #[repr(C)]
 pub struct Record {
     pub content: ByteBuffer,
+}
+
+pub type ModuleStepHandle = std_types::Uint;
+
+#[repr(C)]
+pub enum ModuleProcessRecordFnResult {
+    /// No output. Typical for destination module
+    None,
+    /// Has some output
+    Some(Record),
 }
