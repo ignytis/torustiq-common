@@ -5,7 +5,7 @@ use super::{module::{ModuleInitStepArgs, ModuleStepHandle, ModuleProcessRecordFn
 // The following functions are expected to be exported by libraries
 pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
 pub type ModuleInitStepFn = extern fn(ModuleInitStepArgs);
-pub type ModuleProcessRecordFn = extern fn (Record) -> ModuleProcessRecordFnResult;
+pub type ModuleProcessRecordFn = extern fn (Record, ModuleStepHandle) -> ModuleProcessRecordFnResult;
 
 // These are callback functions
 

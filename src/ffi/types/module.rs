@@ -40,8 +40,11 @@ pub struct Record {
     pub content: ByteBuffer,
 }
 
+unsafe impl Send for Record {}
+
 pub type ModuleStepHandle = std_types::Uint;
 
+// TODO: review if any result is needed to return at all
 #[repr(C)]
 pub enum ModuleProcessRecordFnResult {
     /// No output. Typical for destination module

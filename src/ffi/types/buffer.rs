@@ -8,14 +8,19 @@ impl ByteBuffer {
     pub fn get_bytes_as_const_ptr(&self) -> *const i8 {
         unsafe { std::mem::transmute(self.bytes) }
     }
-}
 
-pub extern "C" fn generate_data() -> ByteBuffer {
-    let mut buf = vec![0; 512].into_boxed_slice();
-    let bytes = buf.as_mut_ptr();
-    let len = buf.len();
-    std::mem::forget(buf);
-    ByteBuffer { bytes, len }
+    pub fn from_string(input: String) -> Self {
+        let mut dst: Vec<u8> = Vec::with_capacity(input.len());
+        unsafe { std::ptr::copy(input.as_ptr(), dst.as_mut_ptr(), input.len()) };
+        let bytes = dst.as_mut_ptr();
+        std::mem::forget(dst);
+
+        // let c_str = CString::new(input).unwrap();
+        ByteBuffer {
+            bytes,
+            len: input.len(),
+        }
+    }
 }
 
 pub extern "C" fn free_buf(buf: ByteBuffer) {
