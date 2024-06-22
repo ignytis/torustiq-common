@@ -5,7 +5,7 @@ pub struct ByteBuffer {
 }
 
 impl ByteBuffer {
-    pub fn get_bytes_as_const_ptr(&self) -> *const i8 {
+    pub fn get_bytes_as_const_ptr<T>(&self) -> *const T {
         unsafe { std::mem::transmute(self.bytes) }
     }
 
@@ -15,7 +15,6 @@ impl ByteBuffer {
         let bytes = dst.as_mut_ptr();
         std::mem::forget(dst);
 
-        // let c_str = CString::new(input).unwrap();
         ByteBuffer {
             bytes,
             len: input.len(),
