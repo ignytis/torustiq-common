@@ -27,3 +27,9 @@ pub fn str_to_cchar(s: &str) -> ConstCharPtr {
         .expect("Failed to convert String to c_char")
         .into_raw()
 }
+
+pub fn string_to_cchar<S: Into<String>>(s: S) -> ConstCharPtr {
+    CString::new(s.into())
+        .expect("Failed to convert String to c_char")
+        .into_raw()
+}

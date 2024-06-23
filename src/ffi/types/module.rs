@@ -26,7 +26,7 @@ pub struct ModuleInfo {
 
 /// Arguments passed to init function
 #[repr(C)]
-pub struct ModuleInitStepArgs {
+pub struct ModuleStepInitArgs {
     pub step_handle: ModuleStepHandle,
     pub termination_handler: ModuleTerminationHandlerFn,
 
