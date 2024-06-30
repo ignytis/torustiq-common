@@ -1,6 +1,6 @@
-use crate::ffi::types::std_types;
+use crate::ffi::{types::std_types, utils::strings::string_to_cchar};
 
-use super::{buffer::ByteBuffer, functions::{
+use super::{buffer::ByteBuffer, collections::Array, functions::{
     ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
 }};
 
@@ -33,11 +33,27 @@ pub struct ModuleStepInitArgs {
     pub on_data_received_fn: ModuleOnDataReceivedFn,
 }
 
+/// Record metadata. Each item is a key-value pair + a reference to the next record
+#[repr(C)]
+pub struct RecordMetadata {
+    pub name : std_types::ConstCharPtr,
+    pub value: std_types::ConstCharPtr,
+}
+
+impl From<(String, String)> for RecordMetadata {
+    fn from(value: (String, String)) -> Self {
+        RecordMetadata {
+            name: string_to_cchar(value.0),
+            value: string_to_cchar(value.1),
+        }
+    }
+}
+
 /// A single piece of data to transmit. Contains the data itself + metadata
-/// TODO: add metadata
 #[repr(C)]
 pub struct Record {
     pub content: ByteBuffer,
+    pub metadata: Array<RecordMetadata>,
 }
 
 unsafe impl Send for Record {}

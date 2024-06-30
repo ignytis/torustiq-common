@@ -10,6 +10,19 @@ impl ByteBuffer {
     }
 }
 
+impl From<Vec<u8>> for ByteBuffer {
+    fn from(value: Vec<u8>) -> Self {
+        let mut dst: Vec<u8> = value.clone();
+        let bytes = dst.as_mut_ptr();
+        std::mem::forget(dst);
+
+        ByteBuffer {
+            bytes,
+            len: value.len(),
+        }
+    }
+}
+
 impl From<String> for ByteBuffer {
     fn from(input: String) -> Self {
         let mut dst: Vec<u8> = Vec::with_capacity(input.len());
