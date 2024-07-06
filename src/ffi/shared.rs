@@ -10,6 +10,9 @@ use crate::
 
 use once_cell::sync::Lazy;
 
+/// A 2-dimensional hash map
+/// Dimension 1: key = module step handle
+/// Dimension 2: key = parameter name
 static MODULE_PARAMS: Lazy<Mutex<HashMap<ModuleStepHandle, HashMap<String, String>>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
@@ -23,4 +26,15 @@ pub extern "C" fn torustiq_module_step_set_param(h: ModuleStepHandle, k: ConstCh
     }
     let step_cfg = module_params_container.get_mut(&h).unwrap();
     step_cfg.insert(cchar_to_string(k), cchar_to_string(v));
+}
+
+pub fn get_param<S: Into<String>>(h: ModuleStepHandle, k: S) -> Option<String> {
+    let module_params_container = MODULE_PARAMS.lock().unwrap();
+    match module_params_container.get(&h) {
+        Some(params) => match params.get(&(k.into())) {
+            Some(s) => Some(s.clone()),
+            None => None,
+        },
+        None => None,
+    }
 }
