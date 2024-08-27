@@ -72,6 +72,10 @@ pub enum ModuleStepInitFnResult {
     /// The provided kind (source, transformation, destination) is not supported by module.
     /// Modules don't necessarily can handle all kinds of steps
     ErrorKindNotSupported,
+    /// Module can be used in one step only.
+    /// Some modules can have issues with having initialized for multiple steps
+    /// Argument is a handle of previously initialized module which caused a conflict
+    ErrorMultipleStepsNotSupported(ModuleStepHandle),
     /// Other kind of error occurred. More details in text message
     ErrorMisc(std_types::ConstCharPtr),
 }
