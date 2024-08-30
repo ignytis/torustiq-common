@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString};
+use std::ffi::{c_char, CStr, CString};
 
 use crate::ffi::types::std_types::{ConstBytePtr, ConstCharPtr};
 
@@ -32,4 +32,9 @@ pub fn string_to_cchar<S: Into<String>>(s: S) -> ConstCharPtr {
     CString::new(s.into())
         .expect("Failed to convert String to c_char")
         .into_raw()
+}
+
+pub fn cchar_const_deallocate(c: ConstCharPtr) {
+    let c = c as *mut c_char;
+    let _ = unsafe { CString::from_raw(c) };
 }

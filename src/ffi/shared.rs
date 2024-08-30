@@ -4,11 +4,13 @@ use std::{collections::HashMap, sync::Mutex};
 
 use crate::
     ffi::{
-        types::{module::ModuleStepHandle, std_types::ConstCharPtr},
+        types::{module::{ModuleStepHandle, Record}, std_types::ConstCharPtr},
         utils::strings::cchar_to_string,
     };
 
 use once_cell::sync::Lazy;
+
+use super::types::buffer::free_buf;
 
 /// A 2-dimensional hash map
 /// Dimension 1: key = module step handle
@@ -26,6 +28,11 @@ pub extern "C" fn torustiq_module_step_set_param(h: ModuleStepHandle, k: ConstCh
     }
     let step_cfg = module_params_container.get_mut(&h).unwrap();
     step_cfg.insert(cchar_to_string(k), cchar_to_string(v));
+}
+
+#[no_mangle]
+pub extern "C" fn torustiq_module_free_record(r: Record) {
+    free_buf(r.content);
 }
 
 pub fn get_param<S: Into<String>>(h: ModuleStepHandle, k: S) -> Option<String> {

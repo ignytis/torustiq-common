@@ -19,3 +19,6 @@ pub type ModuleProcessRecordFn = extern fn (Record, ModuleStepHandle) -> ModuleP
 /// 2. Step handle to identity the source
 pub type ModuleOnDataReceivedFn = extern fn(Record, ModuleStepHandle);
 pub type ModuleTerminationHandlerFn = extern fn(std_types::Uint);
+
+
+pub type ModuleFreeRecordFn = extern fn(Record);

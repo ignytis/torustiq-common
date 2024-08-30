@@ -1,9 +1,20 @@
 use crate::ffi::types::std_types;
 
+use super::traits::ShallowCopy;
+
 #[repr(C)]
 pub struct Array<T> {
     pub data: *mut T,
     pub len: std_types::Uint,
+}
+
+impl<T> ShallowCopy for Array<T> {
+    fn shallow_copy(&self) -> Self {
+        Array {
+            data: self.data,
+            len: self.len,
+        }
+    }
 }
 
 impl<T> Array<T> {

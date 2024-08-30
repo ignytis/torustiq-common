@@ -2,7 +2,7 @@ use crate::ffi::{types::std_types, utils::strings::string_to_cchar};
 
 use super::{buffer::ByteBuffer, collections::Array, functions::{
     ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
-}};
+}, traits::ShallowCopy};
 
 /// Module information
 #[derive(Clone)]
@@ -61,6 +61,15 @@ pub struct Record {
 }
 
 unsafe impl Send for Record {}
+
+impl ShallowCopy for Record {
+    fn shallow_copy(&self) -> Self {
+        Self {
+            content: self.content.shallow_copy(),
+            metadata: self.metadata.shallow_copy(),
+        }
+    }
+}
 
 pub type ModuleStepHandle = std_types::Uint;
 
