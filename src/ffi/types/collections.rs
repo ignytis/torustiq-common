@@ -3,6 +3,7 @@ use crate::ffi::types::std_types;
 use super::traits::ShallowCopy;
 
 #[repr(C)]
+#[derive(Clone)]
 pub struct Array<T> {
     pub data: *mut T,
     pub len: std_types::Uint,

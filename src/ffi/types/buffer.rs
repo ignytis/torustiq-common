@@ -1,7 +1,6 @@
 use super::traits::ShallowCopy;
 
 #[repr(C)]
-#[derive(Clone)]
 pub struct ByteBuffer {
     pub bytes: *mut u8,
     pub len: usize,
@@ -10,6 +9,19 @@ pub struct ByteBuffer {
 impl ByteBuffer {
     pub fn get_bytes_as_const_ptr<T>(&self) -> *const T {
         unsafe { std::mem::transmute(self.bytes) }
+    }
+}
+
+impl Clone for ByteBuffer {
+    fn clone(&self) -> Self {
+        let mut bytes: Vec<u8> = Vec::with_capacity(self.len);
+        unsafe { std::ptr::copy(self.bytes, bytes.as_mut_ptr(), self.len) };
+        let ptr = bytes.as_mut_ptr();
+        std::mem::forget(bytes);
+        ByteBuffer {
+            len: self.len,
+            bytes: ptr,
+        }
     }
 }
 

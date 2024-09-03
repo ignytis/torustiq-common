@@ -39,6 +39,7 @@ pub struct ModuleStepInitArgs {
 
 /// Record metadata. Each item is a key-value pair + a reference to the next record
 #[repr(C)]
+#[derive(Clone)]
 pub struct RecordMetadata {
     pub name : std_types::ConstCharPtr,
     pub value: std_types::ConstCharPtr,
@@ -55,6 +56,7 @@ impl From<(String, String)> for RecordMetadata {
 
 /// A single piece of data to transmit. Contains the data itself + metadata
 #[repr(C)]
+#[derive(Clone)]
 pub struct Record {
     pub content: ByteBuffer,
     pub metadata: Array<RecordMetadata>,
