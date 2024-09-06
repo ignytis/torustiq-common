@@ -1,3 +1,5 @@
+use crate::ffi::utils::strings::bytes_to_string_safe;
+
 use super::traits::ShallowCopy;
 
 #[repr(C)]
@@ -9,6 +11,10 @@ pub struct ByteBuffer {
 impl ByteBuffer {
     pub fn get_bytes_as_const_ptr<T>(&self) -> *const T {
         unsafe { std::mem::transmute(self.bytes) }
+    }
+
+    pub fn to_string(&self) -> String {
+        bytes_to_string_safe(self.bytes, self.len)
     }
 }
 
