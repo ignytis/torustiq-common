@@ -35,6 +35,14 @@ pub extern "C" fn torustiq_module_free_record(r: Record) {
     free_buf(r.content);
 }
 
+pub fn get_params(h: ModuleStepHandle) -> Option<HashMap<String, String>> {
+    let module_params_container = MODULE_PARAMS.lock().unwrap();
+    match module_params_container.get(&h) {
+        Some(params) => Some(params.clone()),
+        None => None,
+    }
+}
+
 pub fn get_param<S: Into<String>>(h: ModuleStepHandle, k: S) -> Option<String> {
     let module_params_container = MODULE_PARAMS.lock().unwrap();
     match module_params_container.get(&h) {

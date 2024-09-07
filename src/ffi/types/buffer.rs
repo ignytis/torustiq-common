@@ -16,6 +16,16 @@ impl ByteBuffer {
     pub fn to_string(&self) -> String {
         bytes_to_string_safe(self.bytes, self.len)
     }
+
+    pub fn to_byte_vec(&self) -> Vec<u8> {
+        let mut dst: Vec<u8> = Vec::with_capacity(self.len);
+        unsafe {
+            std::ptr::copy(self.bytes, dst.as_mut_ptr(), self.len);
+             // NB: set_len is needed here; setting the capacity is not enough
+            dst.set_len(self.len);
+        };
+        dst
+    }
 }
 
 impl Clone for ByteBuffer {

@@ -17,6 +17,7 @@ pub fn bytes_to_string_safe(src: ConstBytePtr, len: usize) -> String {
     let mut dst: Vec<u8> = Vec::with_capacity(len);
     unsafe {
         std::ptr::copy(src, dst.as_mut_ptr(), len);
+        // NB: set_len is needed here; setting the capacity is not enough
         dst.set_len(len);
     };
     String::from_utf8_lossy(dst.as_slice()).to_string()
@@ -28,6 +29,8 @@ pub fn str_to_cchar(s: &str) -> ConstCharPtr {
         .into_raw()
 }
 
+/// Converts String to char* C type.
+/// NB: the output of this function must be deallocated later using 'cchar_const_deallocate' function
 pub fn string_to_cchar<S: Into<String>>(s: S) -> ConstCharPtr {
     CString::new(s.into())
         .expect("Failed to convert String to c_char")
