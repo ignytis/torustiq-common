@@ -29,7 +29,7 @@ pub enum PipelineStepKind {
 
 /// Arguments passed to init function
 #[repr(C)]
-pub struct ModuleStepInitArgs {
+pub struct ModuleStepConfigureArgs {
     pub kind: PipelineStepKind,
     pub step_handle: ModuleStepHandle,
     pub termination_handler: ModuleTerminationHandlerFn,
@@ -75,10 +75,10 @@ impl ShallowCopy for Record {
 
 pub type ModuleStepHandle = std_types::Uint;
 
-/// Returns the status of module initialization
+/// Returns the status of module configuration
 #[repr(C)]
-pub enum ModuleStepInitFnResult {
-    /// Initialization succeeded
+pub enum ModuleStepConfigureFnResult {
+    /// Configuration succeeded
     Ok,
     /// The provided kind (source, transformation, destination) is not supported by module.
     /// Modules don't necessarily can handle all kinds of steps
