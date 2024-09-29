@@ -29,6 +29,7 @@ pub enum PipelineStepKind {
 
 /// Arguments passed to init function
 #[repr(C)]
+#[derive(Clone)]
 pub struct ModuleStepConfigureArgs {
     pub kind: PipelineStepKind,
     pub step_handle: ModuleStepHandle,
@@ -75,7 +76,7 @@ impl ShallowCopy for Record {
 
 pub type ModuleStepHandle = std_types::Uint;
 
-/// Returns the status of module configuration
+/// Returns the status of module step configuration
 #[repr(C)]
 pub enum ModuleStepConfigureFnResult {
     /// Configuration succeeded
@@ -87,6 +88,15 @@ pub enum ModuleStepConfigureFnResult {
     /// Some modules can have issues with having initialized for multiple steps
     /// Argument is a handle of previously initialized module which caused a conflict
     ErrorMultipleStepsNotSupported(ModuleStepHandle),
+    /// Other kind of error occurred. More details in text message
+    ErrorMisc(std_types::ConstCharPtr),
+}
+
+/// Returns the status of module step start
+#[repr(C)]
+pub enum ModuleStepStartFnResult {
+    /// Started successfully
+    Ok,
     /// Other kind of error occurred. More details in text message
     ErrorMisc(std_types::ConstCharPtr),
 }

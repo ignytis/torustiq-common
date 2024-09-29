@@ -1,6 +1,10 @@
 use crate::ffi::types::module::ModuleInfo;
 
-use super::{module::{ModuleStepConfigureArgs, ModuleStepConfigureFnResult, ModuleStepHandle, ModuleProcessRecordFnResult, Record}, std_types};
+use super::{
+    module::{
+        ModuleProcessRecordFnResult, ModuleStepConfigureArgs, ModuleStepConfigureFnResult,
+        ModuleStepHandle, ModuleStepStartFnResult, Record}, std_types
+    };
 
 // The following functions are expected to be exported by libraries
 pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
@@ -9,6 +13,9 @@ pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
 pub type ModuleInitFn = extern fn();
 /// Passes a configuration to step
 pub type ModuleStepConfigureFn = extern fn(ModuleStepConfigureArgs) -> ModuleStepConfigureFnResult;
+/// Starts the routines inside step (opens HTTP connections, generator threads, message broker consumers, etc)
+/// After calling this function the step is ready to process the data
+pub type ModuleStepStartFn = extern fn(ModuleStepHandle) -> ModuleStepStartFnResult;
 /// Sets a param for module step. Typicaly param is passed from step definition
 pub type ModuleStepSetParamFn = extern fn(ModuleStepHandle, std_types::ConstCharPtr, std_types::ConstCharPtr);
 pub type ModuleProcessRecordFn = extern fn (Record, ModuleStepHandle) -> ModuleProcessRecordFnResult;

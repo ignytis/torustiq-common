@@ -10,9 +10,13 @@ use crate::
 
 use once_cell::sync::Lazy;
 
-use super::types::buffer::free_buf;
+use super::types::{buffer::free_buf, module::ModuleStepConfigureArgs};
 
-/// A 2-dimensional hash map
+static MODULE_STEP_CONFIGURATION: Lazy<Mutex<HashMap<ModuleStepHandle, ModuleStepConfigureArgs>>> = Lazy::new(|| {
+    Mutex::new(HashMap::new())
+});
+
+/// A 2-dimensional hash map of parameters passed from configuration - like credentials, operating mode, etc
 /// Dimension 1: key = module step handle
 /// Dimension 2: key = parameter name
 static MODULE_PARAMS: Lazy<Mutex<HashMap<ModuleStepHandle, HashMap<String, String>>>> = Lazy::new(|| {
@@ -33,6 +37,18 @@ pub extern "C" fn torustiq_module_step_set_param(h: ModuleStepHandle, k: ConstCh
 #[no_mangle]
 pub extern "C" fn torustiq_module_free_record(r: Record) {
     free_buf(r.content);
+}
+
+pub fn get_step_configuration(h: ModuleStepHandle) -> Option<ModuleStepConfigureArgs> {
+    let module_params_container = MODULE_STEP_CONFIGURATION.lock().unwrap();
+    match module_params_container.get(&h) {
+        Some(c) => Some(c.clone()),
+        None => None,
+    }
+}
+
+pub fn set_step_configuration(a: ModuleStepConfigureArgs) {
+    MODULE_STEP_CONFIGURATION.lock().unwrap().insert(a.step_handle, a);
 }
 
 pub fn get_params(h: ModuleStepHandle) -> Option<HashMap<String, String>> {
