@@ -24,6 +24,7 @@ static MODULE_PARAMS: Lazy<Mutex<HashMap<ModuleStepHandle, HashMap<String, Strin
 });
 
 /// Sets a parameter for step
+#[cfg(feature="export_fn__step_set_param")]
 #[no_mangle]
 pub extern "C" fn torustiq_module_step_set_param(h: ModuleStepHandle, k: ConstCharPtr, v: ConstCharPtr) {
     let mut module_params_container = MODULE_PARAMS.lock().unwrap();
@@ -34,6 +35,26 @@ pub extern "C" fn torustiq_module_step_set_param(h: ModuleStepHandle, k: ConstCh
     step_cfg.insert(cchar_to_string(k), cchar_to_string(v));
 }
 
+/// Called by main application to trigger the shutdown
+#[cfg(feature="export_fn__step_shutdown")]
+#[no_mangle]
+pub extern "C" fn torustiq_module_step_shutdown(h: ModuleStepHandle) {
+    // No action except forwarding the termination signal back to the main application.
+    // Some modules might need additional action like graceful shutdown, exitting from loops etc
+    use log::error;
+    let cfg = match get_step_configuration(h) {
+        Some(c) => c,
+        None => {
+            error!("An unregistered module handle provided: {}", h);
+            return;
+        }
+    };
+    (cfg.on_step_terminate_cb)(h);
+}
+
+
+/// Deallocates memory for a record
+#[cfg(feature="export_fn__free_record")]
 #[no_mangle]
 pub extern "C" fn torustiq_module_free_record(r: Record) {
     free_buf(r.content);

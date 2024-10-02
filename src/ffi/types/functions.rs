@@ -18,6 +18,8 @@ pub type ModuleStepConfigureFn = extern fn(ModuleStepConfigureArgs) -> ModuleSte
 pub type ModuleStepStartFn = extern fn(ModuleStepHandle) -> ModuleStepStartFnResult;
 /// Sets a param for module step. Typicaly param is passed from step definition
 pub type ModuleStepSetParamFn = extern fn(ModuleStepHandle, std_types::ConstCharPtr, std_types::ConstCharPtr);
+/// Signals the module step to shut down
+pub type ModuleStepShutdownFn = extern fn(ModuleStepHandle);
 pub type ModuleProcessRecordFn = extern fn (Record, ModuleStepHandle) -> ModuleProcessRecordFnResult;
 
 // These are callback functions

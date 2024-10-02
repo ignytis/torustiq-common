@@ -33,7 +33,7 @@ pub enum PipelineStepKind {
 pub struct ModuleStepConfigureArgs {
     pub kind: PipelineStepKind,
     pub step_handle: ModuleStepHandle,
-    pub termination_handler: ModuleTerminationHandlerFn,
+    pub on_step_terminate_cb: ModuleTerminationHandlerFn,
 
     pub on_data_received_fn: ModuleOnDataReceivedFn,
 }
