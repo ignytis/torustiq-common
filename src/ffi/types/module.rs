@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::ffi::{types::std_types, utils::strings::string_to_cchar};
 
 use super::{buffer::ByteBuffer, collections::Array, functions::{
@@ -70,6 +72,20 @@ impl ShallowCopy for Record {
         Self {
             content: self.content.shallow_copy(),
             metadata: self.metadata.shallow_copy(),
+        }
+    }
+}
+
+impl Record {
+    /// Creates a record from standard types: content (vector of bytes)
+    /// and metadata (string hashmap)
+    pub fn from_std_types(content: Vec<u8>, metadata: HashMap<String, String>) -> Self {
+        let metadata_vec: Vec<RecordMetadata> = metadata
+            .into_iter()
+            .map(|kv| kv.into()).collect();
+        Record {
+            content: ByteBuffer::from(content),
+            metadata: Array::from_vec(metadata_vec),
         }
     }
 }
