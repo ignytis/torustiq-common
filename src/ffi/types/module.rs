@@ -117,12 +117,11 @@ pub enum ModuleStepStartFnResult {
     ErrorMisc(std_types::ConstCharPtr),
 }
 
-// TODO: review if any result is needed to return at all
-// TODO2: probably just need to report if data transfer is succeeded
+/// A result of sending a record to further processing
 #[repr(C)]
 pub enum ModuleProcessRecordFnResult {
-    /// No output. Typical for destination module
-    None,
-    /// Has some output
-    Some(Record),
+    /// Processing succeeded. No immediate error occurred
+    Ok,
+    /// Cannot proces record due to error
+    Err(Record, std_types::ConstCharPtr),
 }
