@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::ffi::{types::std_types, utils::strings::string_to_cchar};
+use crate::ffi::{
+    types::std_types,
+    utils::strings::{cchar_to_string, string_to_cchar}
+};
 
 use super::{buffer::ByteBuffer, collections::Array, functions::{
     ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
@@ -87,6 +90,15 @@ impl Record {
             content: ByteBuffer::from(content),
             metadata: Array::from_vec(metadata_vec),
         }
+    }
+
+    /// Returns metadata as hashmap of string key-value pairs
+    pub fn get_metadata_as_hashmap(&self) -> HashMap<String, String> {
+        let mtd_len = self.metadata.len as usize;
+        let metadata: Vec<RecordMetadata> = unsafe { Vec::from_raw_parts(self.metadata.data, mtd_len, mtd_len) };
+        metadata.into_iter()
+            .map(|record| (cchar_to_string(record.name), cchar_to_string(record.value)))
+            .collect::<HashMap<String, String>>()
     }
 }
 

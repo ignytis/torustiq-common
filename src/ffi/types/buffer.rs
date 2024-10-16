@@ -77,7 +77,6 @@ impl From<String> for ByteBuffer {
     }
 }
 
-// TODO: check for memory leaks and start using this function
 pub extern "C" fn free_buf(buf: ByteBuffer) {
     let s = unsafe { std::slice::from_raw_parts_mut(buf.bytes, buf.len) };
     let s = s.as_mut_ptr();
