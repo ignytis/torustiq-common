@@ -9,7 +9,9 @@ log = "0.4.21"
 once_cell = "1.19.0"
 
 [features]
-default = ["export_fn__free_record", "export_fn__step_set_param", "export_fn__step_shutdown"]
+pipeline_module_all = ["pipeline_module_essentials", "export_fn__step_shutdown", "pipeline_module_async_process"]
+pipeline_module_essentials = ["export_fn__free_record", "export_fn__step_set_param"]
 export_fn__free_record = []
 export_fn__step_set_param = []
 export_fn__step_shutdown = []
+pipeline_module_async_process = []

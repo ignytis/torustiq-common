@@ -1,16 +1,18 @@
 /// Routines which are re-usable in modules
 
-use std::{collections::HashMap, sync::Mutex};
-
-use crate::
-    ffi::{
-        types::{module::{ModuleStepHandle, Record}, std_types::ConstCharPtr},
-        utils::strings::cchar_to_string,
-    };
+use std::{collections::HashMap, sync:: Mutex};
 
 use once_cell::sync::Lazy;
 
-use super::types::{buffer::free_buf, module::ModuleStepConfigureArgs};
+use crate::ffi::types::module::{ModuleStepHandle, ModuleStepConfigureArgs};
+#[cfg(feature="export_fn__free_record")]
+use crate::ffi::types::{module::Record, buffer::free_buf};
+
+#[cfg(feature="export_fn__step_set_param")]
+use crate::ffi::{
+    types::std_types::ConstCharPtr,
+    utils::strings::cchar_to_string
+};
 
 static MODULE_STEP_CONFIGURATION: Lazy<Mutex<HashMap<ModuleStepHandle, ModuleStepConfigureArgs>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())

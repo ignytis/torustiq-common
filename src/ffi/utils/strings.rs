@@ -2,17 +2,23 @@ use std::ffi::{c_char, CStr, CString};
 
 use crate::ffi::types::std_types::{ConstBytePtr, ConstCharPtr};
 
+///Converts a *char C type into Rust string.
+/// ```
+/// use torustiq_common::ffi::utils::strings;
+/// assert_eq!(strings::cchar_to_string(c"Hello, World!".as_ptr()),
+///            String::from("Hello, World!"));
+/// ```
 pub fn cchar_to_string(c: ConstCharPtr) -> String {
     unsafe { CStr::from_ptr(c).to_string_lossy().to_string() }
 }
 
-pub fn cchar_to_string_safe(src: ConstCharPtr, len: usize) -> String {
-    let src_u8: ConstBytePtr = unsafe { std::mem::transmute(src) };
-    let mut dst: Vec<u8> = Vec::with_capacity(len);
-    unsafe { std::ptr::copy(src_u8, dst.as_mut_ptr(), len) };
-    String::from_utf8_lossy(dst.as_slice()).to_string()
-}
-
+///Converts a C-style byte array (=a pointer to unsigned small integers) into Rust string,
+/// considering the provided array length
+/// ```
+/// use torustiq_common::ffi::utils::strings;
+/// assert_eq!(strings::bytes_to_string_safe(c"Hello, World!".as_ptr() as *const u8, 13),
+///            String::from("Hello, World!"));
+/// ```
 pub fn bytes_to_string_safe(src: ConstBytePtr, len: usize) -> String {
     let mut dst: Vec<u8> = Vec::with_capacity(len);
     unsafe {
