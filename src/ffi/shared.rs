@@ -4,9 +4,10 @@ use std::{collections::HashMap, sync:: Mutex};
 
 use once_cell::sync::Lazy;
 
-use crate::ffi::types::module::{ModuleStepHandle, ModuleStepConfigureArgs};
-#[cfg(feature="export_fn__free_record")]
-use crate::ffi::types::{module::Record, buffer::free_buf};
+use crate::ffi::types::{
+    buffer::free_buf,
+    module::{ModuleStepHandle, ModuleStepConfigureArgs, Record}
+};
 
 #[cfg(feature="export_fn__step_set_param")]
 use crate::ffi::{
@@ -59,6 +60,10 @@ pub extern "C" fn torustiq_module_step_shutdown(h: ModuleStepHandle) {
 #[cfg(feature="export_fn__free_record")]
 #[no_mangle]
 pub extern "C" fn torustiq_module_free_record(r: Record) {
+    do_free_record(r);
+}
+
+pub fn do_free_record(r: Record) {
     free_buf(r.content);
 }
 
