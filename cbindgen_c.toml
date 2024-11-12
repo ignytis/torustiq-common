@@ -1,0 +1,27 @@
+language = "c"
+
+include_guard = "_TORUSTIQ_COMMON_H_"
+
+[export]
+
+
+include = [
+    "ModuleInfo",
+    "ModuleStepConfigureArgs", "ModuleStepConfigureFnResult",
+
+    "ModuleStepStartFnResult",
+    "ModuleProcessRecordFnResult",
+    
+    "ConstCStrPtr",
+
+    "PipelineStepKind",
+]
+
+prefix = "torustiq_common_"
+
+[parse.expand]
+all_features = true
+
+
+[enum]
+prefix_with_name = true

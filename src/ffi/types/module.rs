@@ -135,5 +135,5 @@ pub enum ModuleProcessRecordFnResult {
     /// Processing succeeded. No immediate error occurred
     Ok,
     /// Cannot proces record due to error
-    Err(Record, std_types::ConstCharPtr),
+    Err(std_types::ConstCharPtr),
 }

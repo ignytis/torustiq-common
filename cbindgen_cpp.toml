@@ -1,0 +1,23 @@
+language = "cpp"
+
+namespace = "torustiq_common"
+
+include_guard = "_TORUSTIQ_COMMON_H_"
+
+[export]
+
+
+include = [
+    "ModuleInfo",
+    "ModuleStepConfigureArgs", "ModuleStepConfigureFnResult",
+
+    "ModuleStepStartFnResult",
+    "ModuleProcessRecordFnResult",
+    
+    "ConstCStrPtr",
+
+    "PipelineStepKind",
+]
+
+[parse.expand]
+all_features = true
