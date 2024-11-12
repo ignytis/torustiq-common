@@ -9,11 +9,11 @@ use crate::ffi::types::{
     module::{ModuleStepHandle, ModuleStepConfigureArgs, Record}
 };
 
+#[cfg(feature="export_type__cchar")]
+use crate::ffi::types::std_types::ConstCharPtr;
+
 #[cfg(feature="export_fn__step_set_param")]
-use crate::ffi::{
-    types::std_types::ConstCharPtr,
-    utils::strings::cchar_to_string
-};
+use crate::ffi::utils::strings::cchar_to_string;
 
 static MODULE_STEP_CONFIGURATION: Lazy<Mutex<HashMap<ModuleStepHandle, ModuleStepConfigureArgs>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
@@ -62,6 +62,16 @@ pub extern "C" fn torustiq_module_step_shutdown(h: ModuleStepHandle) {
 pub extern "C" fn torustiq_module_free_record(r: Record) {
     do_free_record(r);
 }
+
+/// Deallocates memory for a record
+#[cfg(feature="export_fn__free_char_ptr")]
+#[no_mangle]
+pub extern "C" fn torustiq_module_free_char_ptr(c: ConstCharPtr) {
+    use super::utils::strings::cchar_const_deallocate;
+
+    cchar_const_deallocate(c);
+}
+
 
 pub fn do_free_record(r: Record) {
     free_buf(r.content);

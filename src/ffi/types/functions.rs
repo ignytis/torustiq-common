@@ -3,7 +3,7 @@ use crate::ffi::types::module::ModuleInfo;
 use super::{
     module::{
         ModuleProcessRecordFnResult, ModuleStepConfigureArgs, ModuleStepConfigureFnResult,
-        ModuleStepHandle, ModuleStepStartFnResult, Record}, std_types
+        ModuleStepHandle, ModuleStepStartFnResult, Record}, std_types::{self, ConstCharPtr}
     };
 
 // The following functions are expected to be exported by libraries
@@ -32,3 +32,4 @@ pub type ModuleTerminationHandlerFn = extern fn(std_types::Uint);
 
 
 pub type ModuleFreeRecordFn = extern fn(Record);
+pub type ModuleFreeCharPtrFn = extern fn(ConstCharPtr);
