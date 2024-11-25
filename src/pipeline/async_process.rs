@@ -12,7 +12,7 @@ pub static RECORD_RECEIVERS: Lazy<Mutex<HashMap<ModuleStepHandle, Receiver<Recor
 
 
 #[no_mangle]
-extern "C" fn torustiq_module_process_record(in_record: Record, step_handle: ModuleStepHandle) -> ModuleProcessRecordFnResult {
+extern "C" fn torustiq_module_step_process_record(in_record: Record, step_handle: ModuleStepHandle) -> ModuleProcessRecordFnResult {
     let mutex = RECORD_SENDERS.lock().unwrap();
     let sender = match mutex.get(&step_handle) {
         Some(s) => s,
