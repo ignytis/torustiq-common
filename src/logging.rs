@@ -1,8 +1,7 @@
-use std::env;
+use env_logger::{Builder, Env};
 
 pub fn init_logger() {
-    if env::var("RUST_LOG").is_err() {
-        env::set_var("RUST_LOG", "info")
-    }
-    env_logger::init();
+    let env = Env::default()
+        .filter_or("LOG_LEVEL", "info");
+    Builder::from_env(env).init();
 }
