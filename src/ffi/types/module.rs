@@ -9,11 +9,22 @@ use super::{buffer::ByteBuffer, collections::Array, functions::{
     ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
 }, traits::ShallowCopy};
 
+#[derive(Clone)]
+#[repr(C)]
+pub enum ModuleKind {
+    /// A pipeline step module. Extracts, transforms, loads the data.
+    Step,
+    /// An event listener module. Reacts to application events.
+    EventListener,
+}
+
 /// Module information
 #[derive(Clone)]
 #[repr(C)]
 pub struct ModuleInfo {
+    pub api_version: std_types::Uint,
     pub id: std_types::ConstCharPtr,
+    pub kind: ModuleKind,
     pub name: std_types::ConstCharPtr,
 }
 

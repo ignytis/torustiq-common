@@ -29,6 +29,7 @@ pub fn bytes_to_string_safe(src: ConstBytePtr, len: usize) -> String {
     String::from_utf8_lossy(dst.as_slice()).to_string()
 }
 
+/// NB: the output of this function must be deallocated later using 'cchar_const_deallocate' function
 pub fn str_to_cchar(s: &str) -> ConstCharPtr {
     CString::new(s)
         .expect("Failed to convert String to c_char")
@@ -43,6 +44,8 @@ pub fn string_to_cchar<S: Into<String>>(s: S) -> ConstCharPtr {
         .into_raw()
 }
 
+/// Deallocates memory for C string.
+/// This function should be called for strings created by string_to_cchar functions to avoid memory leaks.
 pub fn cchar_const_deallocate(c: ConstCharPtr) {
     let c = c as *mut c_char;
     let _ = unsafe { CString::from_raw(c) };
