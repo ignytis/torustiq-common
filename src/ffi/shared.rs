@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 
 use crate::ffi::types::{
     buffer::free_buf,
-    module::{ModuleStepHandle, ModuleStepConfigureArgs, Record}
+    module::{ModuleStepHandle, ModulePipelineStepConfigureArgs, Record}
 };
 
 #[cfg(feature="export_type__cchar")]
@@ -15,7 +15,7 @@ use crate::ffi::types::std_types::ConstCharPtr;
 #[cfg(feature="export_fn__step_set_param")]
 use crate::ffi::utils::strings::cchar_to_string;
 
-static MODULE_STEP_CONFIGURATION: Lazy<Mutex<HashMap<ModuleStepHandle, ModuleStepConfigureArgs>>> = Lazy::new(|| {
+static MODULE_STEP_CONFIGURATION: Lazy<Mutex<HashMap<ModuleStepHandle, ModulePipelineStepConfigureArgs>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
 
@@ -29,7 +29,7 @@ static MODULE_PARAMS: Lazy<Mutex<HashMap<ModuleStepHandle, HashMap<String, Strin
 /// Sets a parameter for step
 #[cfg(feature="export_fn__step_set_param")]
 #[no_mangle]
-pub extern "C" fn torustiq_module_step_set_param(h: ModuleStepHandle, k: ConstCharPtr, v: ConstCharPtr) {
+pub extern "C" fn torustiq_step_set_param(h: ModuleStepHandle, k: ConstCharPtr, v: ConstCharPtr) {
     let mut module_params_container = MODULE_PARAMS.lock().unwrap();
     if !module_params_container.contains_key(&h) {
         module_params_container.insert(h, HashMap::new());
@@ -77,7 +77,7 @@ pub fn do_free_record(r: Record) {
     free_buf(r.content);
 }
 
-pub fn get_step_configuration(h: ModuleStepHandle) -> Option<ModuleStepConfigureArgs> {
+pub fn get_step_configuration(h: ModuleStepHandle) -> Option<ModulePipelineStepConfigureArgs> {
     let module_params_container = MODULE_STEP_CONFIGURATION.lock().unwrap();
     match module_params_container.get(&h) {
         Some(c) => Some(c.clone()),
@@ -85,7 +85,7 @@ pub fn get_step_configuration(h: ModuleStepHandle) -> Option<ModuleStepConfigure
     }
 }
 
-pub fn set_step_configuration(a: ModuleStepConfigureArgs) {
+pub fn set_step_configuration(a: ModulePipelineStepConfigureArgs) {
     MODULE_STEP_CONFIGURATION.lock().unwrap().insert(a.step_handle, a);
 }
 

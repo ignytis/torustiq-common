@@ -12,8 +12,8 @@ use super::{buffer::ByteBuffer, collections::Array, functions::{
 #[derive(Clone)]
 #[repr(C)]
 pub enum ModuleKind {
-    /// A pipeline step module. Extracts, transforms, loads the data.
-    Step,
+    /// A pipeline module. Extracts, transforms, loads the data.
+    Pipeline,
     /// An event listener module. Reacts to application events.
     EventListener,
 }
@@ -46,7 +46,7 @@ pub enum PipelineStepKind {
 /// Arguments passed to init function
 #[repr(C)]
 #[derive(Clone)]
-pub struct ModuleStepConfigureArgs {
+pub struct ModulePipelineStepConfigureArgs {
     pub kind: PipelineStepKind,
     pub step_handle: ModuleStepHandle,
     pub on_step_terminate_cb: ModuleTerminationHandlerFn,
@@ -133,7 +133,7 @@ pub enum ModuleStepConfigureFnResult {
 
 /// Returns the status of module step start
 #[repr(C)]
-pub enum ModuleStepStartFnResult {
+pub enum StepStartFnResult {
     /// Started successfully
     Ok,
     /// Other kind of error occurred. More details in text message
