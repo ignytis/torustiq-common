@@ -6,7 +6,7 @@ use crate::ffi::{
 };
 
 use super::{buffer::ByteBuffer, collections::Array, functions::{
-    ModuleOnDataReceivedFn, ModuleTerminationHandlerFn
+    ModuleOnDataReceiveCb, ModuleTerminationHandlerFn
 }, traits::ShallowCopy};
 
 #[derive(Clone)]
@@ -15,7 +15,7 @@ pub enum ModuleKind {
     /// A pipeline module. Extracts, transforms, loads the data.
     Pipeline,
     /// An event listener module. Reacts to application events.
-    EventListener,
+    Listener,
 }
 
 /// Module information
@@ -31,7 +31,7 @@ pub struct ModuleInfo {
 /// Specifies the position of step in pipeline
 #[derive(Clone, PartialEq)]
 #[repr(C)]
-pub enum PipelineStepKind {
+pub enum PipelineModuleKind {
     /// Source: produces the data itself, no input from other steps is expected.
     Source,
     /// Transformation: gets the data from the previous step (source or transformation)
@@ -42,16 +42,21 @@ pub enum PipelineStepKind {
     Destination,
 }
 
-
-/// Arguments passed to init function
+/// Arguments passed to init function for listener module
 #[repr(C)]
 #[derive(Clone)]
-pub struct ModulePipelineStepConfigureArgs {
-    pub kind: PipelineStepKind,
-    pub step_handle: ModuleStepHandle,
-    pub on_step_terminate_cb: ModuleTerminationHandlerFn,
+pub struct ModuleListenerConfigureArgs {
+    pub module_handle: ModuleHandle,
+}
 
-    pub on_data_received_fn: ModuleOnDataReceivedFn,
+/// Arguments passed to init function for pipeline module
+#[repr(C)]
+#[derive(Clone)]
+pub struct ModulePipelineConfigureArgs {
+    pub kind: PipelineModuleKind,
+    pub module_handle: ModuleHandle,
+    pub on_step_terminate_cb: ModuleTerminationHandlerFn,
+    pub on_data_receive_cb: ModuleOnDataReceiveCb,
 }
 
 /// Record metadata. Each item is a key-value pair + a reference to the next record
@@ -113,11 +118,20 @@ impl Record {
     }
 }
 
-pub type ModuleStepHandle = std_types::Uint;
+pub type ModuleHandle = std_types::Uint;
 
-/// Returns the status of module step configuration
+/// Returns the status of listener module configuration
 #[repr(C)]
-pub enum ModuleStepConfigureFnResult {
+pub enum ModuleListenerConfigureFnResult {
+    /// Configuration succeeded
+    Ok,
+    /// Other kind of error occurred. More details in text message
+    ErrorMisc(std_types::ConstCharPtr),
+}
+
+/// Returns the status of pipeline module configuration
+#[repr(C)]
+pub enum ModulePipelineConfigureFnResult {
     /// Configuration succeeded
     Ok,
     /// The provided kind (source, transformation, destination) is not supported by module.
@@ -126,7 +140,7 @@ pub enum ModuleStepConfigureFnResult {
     /// Module can be used in one step only.
     /// Some modules can have issues with having initialized for multiple steps
     /// Argument is a handle of previously initialized module which caused a conflict
-    ErrorMultipleStepsNotSupported(ModuleStepHandle),
+    ErrorMultipleStepsNotSupported(ModuleHandle),
     /// Other kind of error occurred. More details in text message
     ErrorMisc(std_types::ConstCharPtr),
 }
@@ -142,7 +156,7 @@ pub enum StepStartFnResult {
 
 /// A result of sending a record to further processing
 #[repr(C)]
-pub enum ModuleProcessRecordFnResult {
+pub enum ModulePipelineProcessRecordFnResult {
     /// Processing succeeded. No immediate error occurred
     Ok,
     /// Cannot proces record due to error

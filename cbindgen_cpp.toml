@@ -9,14 +9,14 @@ include_guard = "_TORUSTIQ_COMMON_H_"
 
 include = [
     "ModuleInfo",
-    "ModulePipelineStepConfigureArgs", "ModuleStepConfigureFnResult",
+    "ModulePipelineConfigureArgs", "ModulePipelineConfigureFnResult",
 
     "StepStartFnResult",
-    "ModuleProcessRecordFnResult",
+    "ModulePipelineProcessRecordFnResult",
     
     "ConstCStrPtr",
 
-    "PipelineStepKind",
+    "PipelineModuleKind",
 ]
 
 [parse.expand]
