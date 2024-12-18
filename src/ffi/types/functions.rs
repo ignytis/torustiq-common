@@ -11,7 +11,7 @@ pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
 /// Runs once per module i.e. if pipeline has several steps attached to one module, this function will still run once
 pub type ModuleInitFn = extern fn();
 
-pub type ModuleListenerConfigureFn = extern fn(module_types::ModulePipelineConfigureArgs) -> module_types::ModuleListenerConfigureFnResult;
+pub type ModuleListenerConfigureFn = extern fn(module_types::ModuleListenerConfigureArgs) -> module_types::ModuleListenerConfigureFnResult;
 
 /// Passes a configuration to step
 pub type ModulePipelineConfigureFn = extern fn(module_types::ModulePipelineConfigureArgs) -> module_types::ModulePipelineConfigureFnResult;
