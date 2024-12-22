@@ -11,7 +11,11 @@ pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
 /// Runs once per module i.e. if pipeline has several steps attached to one module, this function will still run once
 pub type ModuleInitFn = extern fn();
 
+// Listener module routines
 pub type ModuleListenerConfigureFn = extern fn(module_types::ModuleListenerConfigureArgs) -> module_types::ModuleListenerConfigureFnResult;
+pub type ModuleListenerRecordRcvFn = extern fn(module_types::ModuleHandle, *const module_types::Record);
+pub type ModuleListenerRecordSendSuccessFn = extern fn(module_types::ModuleHandle, *const module_types::Record);
+pub type ModuleListenerRecordSendFailureFn = extern fn(module_types::ModuleHandle, *const module_types::Record);
 
 /// Passes a configuration to step
 pub type ModulePipelineConfigureFn = extern fn(module_types::ModulePipelineConfigureArgs) -> module_types::ModulePipelineConfigureFnResult;
