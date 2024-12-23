@@ -116,6 +116,10 @@ impl Record {
             .map(|record| (cchar_to_string(record.name), cchar_to_string(record.value)))
             .collect::<HashMap<String, String>>()
     }
+
+    pub fn get_content_len(&self) -> usize {
+        self.content.len
+    }
 }
 
 pub type ModuleHandle = std_types::Uint;
