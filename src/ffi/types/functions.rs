@@ -1,18 +1,19 @@
-use crate::ffi::types::module::ModuleInfo;
+use crate::ffi::types::module::LibInfo;
 
 use crate::ffi::types::{
     module as module_types,
     std_types,
 };
 
-// The following functions are expected to be exported by libraries
-pub type ModuleGetInfoFn = extern fn() -> ModuleInfo;
-/// Initialization of general module internals.
-/// Runs once per module i.e. if pipeline has several steps attached to one module, this function will still run once
-pub type ModuleInitFn = extern fn();
+// Pipeline library functions
+pub type LibGetInfoFn = extern fn() -> LibInfo;
+pub type LibPipelineInitFn = extern fn(module_types::LibPipelineInitArgs);
+
+// Listener library functions
 
 // Listener module routines
 pub type ModuleListenerConfigureFn = extern fn(module_types::ModuleListenerConfigureArgs) -> module_types::ModuleListenerConfigureFnResult;
+pub type LibListenerInitFn = extern fn(module_types::LibListenerInitArgs);
 pub type ModuleListenerRecordRcvFn = extern fn(module_types::ModuleHandle, *const module_types::Record);
 pub type ModuleListenerRecordSendSuccessFn = extern fn(module_types::ModuleHandle, *const module_types::Record);
 pub type ModuleListenerRecordSendFailureFn = extern fn(module_types::ModuleHandle, *const module_types::Record);
@@ -38,5 +39,7 @@ pub type ModuleTerminationHandlerFn = extern fn(std_types::Uint);
 
 // These functions are called from host app
 
+pub type ModuleNewRecordPtrFn = extern fn() -> *mut module_types::Record;
 pub type ModuleFreeRecordFn = extern fn(module_types::Record);
+pub type ModuleFreeRecordPtrFn = extern fn(*mut module_types::Record);
 pub type ModuleFreeCharPtrFn = extern fn(std_types::ConstCharPtr);

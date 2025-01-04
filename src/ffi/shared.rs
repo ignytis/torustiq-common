@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 
 use crate::ffi::types::{
     buffer::free_buf,
-    module::{ModuleHandle, ModulePipelineConfigureArgs, Record}
+    module as module_types,
 };
 
 #[cfg(feature="export_type__cchar")]
@@ -17,25 +17,55 @@ use crate::ffi::utils::strings::cchar_to_string;
 
 use super::types::module::ModuleListenerConfigureArgs;
 
-static PIPELINE_MODULE_CONFIGURATION: Lazy<Mutex<HashMap<ModuleHandle, ModulePipelineConfigureArgs>>> = Lazy::new(|| {
+static COMMON_LIB_CONFIGURATION: Lazy<Mutex<Option<module_types::LibCommonInitArgs>>> = Lazy::new(|| {
+    Mutex::new(None)
+});
+
+static PIPELINE_LIB_CONFIGURATION: Lazy<Mutex<Option<module_types::LibPipelineInitArgs>>> = Lazy::new(|| {
+    Mutex::new(None)
+});
+
+static LISTENER_LIB_CONFIGURATION: Lazy<Mutex<Option<module_types::LibListenerInitArgs>>> = Lazy::new(|| {
+    Mutex::new(None)
+});
+
+static PIPELINE_MODULE_CONFIGURATION: Lazy<Mutex<HashMap<module_types::ModuleHandle, module_types::ModulePipelineConfigureArgs>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
 
-static LISTENER_MODULE_CONFIGURATION: Lazy<Mutex<HashMap<ModuleHandle, ModuleListenerConfigureArgs>>> = Lazy::new(|| {
+static LISTENER_MODULE_CONFIGURATION: Lazy<Mutex<HashMap<module_types::ModuleHandle, ModuleListenerConfigureArgs>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
 
 /// A 2-dimensional hash map of parameters passed from configuration - like credentials, operating mode, etc
 /// Dimension 1: key = module step handle
 /// Dimension 2: key = parameter name
-static MODULE_PARAMS: Lazy<Mutex<HashMap<ModuleHandle, HashMap<String, String>>>> = Lazy::new(|| {
+static MODULE_PARAMS: Lazy<Mutex<HashMap<module_types::ModuleHandle, HashMap<String, String>>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
+
+#[cfg(feature="export_fn__lib_listener_init")]
+#[no_mangle]
+extern "C" fn torustiq_lib_listener_init(a: module_types::LibListenerInitArgs) {
+    use crate::logging::init_logger;
+
+    set_listener_lib_configuration(a);
+    init_logger();
+}
+
+#[cfg(feature="export_fn__lib_pipeline_init")]
+#[no_mangle]
+extern "C" fn torustiq_lib_pipeline_init(a: module_types::LibPipelineInitArgs) {
+    use crate::logging::init_logger;
+
+    set_pipeline_lib_configuration(a);
+    init_logger();
+}
 
 /// Sets a parameter for step
 #[cfg(feature="export_fn__step_set_param")]
 #[no_mangle]
-pub extern "C" fn torustiq_module_common_set_param(h: ModuleHandle, k: ConstCharPtr, v: ConstCharPtr) {
+pub extern "C" fn torustiq_module_common_set_param(h: module_types::ModuleHandle, k: ConstCharPtr, v: ConstCharPtr) {
     let mut module_params_container = MODULE_PARAMS.lock().unwrap();
     if !module_params_container.contains_key(&h) {
         module_params_container.insert(h, HashMap::new());
@@ -47,14 +77,14 @@ pub extern "C" fn torustiq_module_common_set_param(h: ModuleHandle, k: ConstChar
 /// Called by main application to trigger the shutdown
 #[cfg(feature="export_fn__step_shutdown")]
 #[no_mangle]
-pub extern "C" fn torustiq_module_common_shutdown(h: ModuleHandle) {
+pub extern "C" fn torustiq_module_common_shutdown(h: module_types::ModuleHandle) {
     // No action except forwarding the termination signal back to the main application.
     // Some modules might need additional action like graceful shutdown, exitting from loops etc
     use log::error;
-    let cfg = match get_pipeline_module_configuration(h) {
+    let cfg = match get_common_lib_configuration() {
         Some(c) => c,
         None => {
-            error!("An unregistered module handle provided: {}", h);
+            error!("torustiq_module_common_shutdown: Failed to load the library configuration");
             return;
         }
     };
@@ -64,11 +94,11 @@ pub extern "C" fn torustiq_module_common_shutdown(h: ModuleHandle) {
 /// Deallocates memory for a record
 #[cfg(feature="export_fn__free_record")]
 #[no_mangle]
-pub extern "C" fn torustiq_module_pipeline_free_record(r: Record) {
+pub extern "C" fn torustiq_module_pipeline_free_record(r: module_types::Record) {
     do_free_record(r);
 }
 
-/// Deallocates memory for a record
+/// Deallocates memory for a C-string
 #[cfg(feature="export_fn__free_char_ptr")]
 #[no_mangle]
 pub extern "C" fn torustiq_module_common_free_char(c: ConstCharPtr) {
@@ -77,15 +107,37 @@ pub extern "C" fn torustiq_module_common_free_char(c: ConstCharPtr) {
     cchar_const_deallocate(c);
 }
 
-pub fn do_free_record(r: Record) {
+pub fn do_free_record(r: module_types::Record) {
     free_buf(r.content);
 }
 
-pub fn set_pipeline_module_configuration(a: ModulePipelineConfigureArgs) {
+pub fn set_listener_lib_configuration(a: module_types::LibListenerInitArgs) {
+    *COMMON_LIB_CONFIGURATION.lock().unwrap() = Some(a.common.clone());
+    *LISTENER_LIB_CONFIGURATION.lock().unwrap() = Some(a);
+}
+
+pub fn get_listener_lib_configuration() -> Option<module_types::LibListenerInitArgs> {
+    LISTENER_LIB_CONFIGURATION.lock().unwrap().clone()
+}
+
+pub fn set_pipeline_lib_configuration(a: module_types::LibPipelineInitArgs) {
+    *COMMON_LIB_CONFIGURATION.lock().unwrap() = Some(a.common.clone());
+    *PIPELINE_LIB_CONFIGURATION.lock().unwrap() = Some(a);
+}
+
+pub fn get_pipeline_lib_configuration() -> Option<module_types::LibPipelineInitArgs> {
+    PIPELINE_LIB_CONFIGURATION.lock().unwrap().clone()
+}
+
+pub fn get_common_lib_configuration() -> Option<module_types::LibCommonInitArgs> {
+    COMMON_LIB_CONFIGURATION.lock().unwrap().clone()
+}
+
+pub fn set_pipeline_module_configuration(a: module_types::ModulePipelineConfigureArgs) {
     PIPELINE_MODULE_CONFIGURATION.lock().unwrap().insert(a.module_handle, a);
 }
 
-pub fn get_pipeline_module_configuration(h: ModuleHandle) -> Option<ModulePipelineConfigureArgs> {
+pub fn get_pipeline_module_configuration(h: module_types::ModuleHandle) -> Option<module_types::ModulePipelineConfigureArgs> {
     let module_params_container = PIPELINE_MODULE_CONFIGURATION.lock().unwrap();
     match module_params_container.get(&h) {
         Some(c) => Some(c.clone()),
@@ -97,7 +149,7 @@ pub fn set_listener_module_configuration(a: ModuleListenerConfigureArgs) {
     LISTENER_MODULE_CONFIGURATION.lock().unwrap().insert(a.module_handle, a);
 }
 
-pub fn get_listener_module_configuration(h: ModuleHandle) -> Option<ModuleListenerConfigureArgs> {
+pub fn get_listener_module_configuration(h: module_types::ModuleHandle) -> Option<ModuleListenerConfigureArgs> {
     let module_params_container = LISTENER_MODULE_CONFIGURATION.lock().unwrap();
     match module_params_container.get(&h) {
         Some(c) => Some(c.clone()),
@@ -105,7 +157,7 @@ pub fn get_listener_module_configuration(h: ModuleHandle) -> Option<ModuleListen
     }
 }
 
-pub fn get_params(h: ModuleHandle) -> Option<HashMap<String, String>> {
+pub fn get_params(h: module_types::ModuleHandle) -> Option<HashMap<String, String>> {
     let module_params_container = MODULE_PARAMS.lock().unwrap();
     match module_params_container.get(&h) {
         Some(params) => Some(params.clone()),
@@ -113,7 +165,7 @@ pub fn get_params(h: ModuleHandle) -> Option<HashMap<String, String>> {
     }
 }
 
-pub fn get_param<S: Into<String>>(h: ModuleHandle, k: S) -> Option<String> {
+pub fn get_param<S: Into<String>>(h: module_types::ModuleHandle, k: S) -> Option<String> {
     let module_params_container = MODULE_PARAMS.lock().unwrap();
     match module_params_container.get(&h) {
         Some(params) => match params.get(&(k.into())) {

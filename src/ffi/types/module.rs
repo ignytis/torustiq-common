@@ -8,6 +8,7 @@ use crate::ffi::{
 use super::{buffer::ByteBuffer, collections::Array, functions::{
     ModuleOnDataReceiveCb, ModuleTerminationHandlerFn
 }, traits::ShallowCopy};
+use crate::ffi::types::functions as fn_defs;
 
 #[derive(Clone)]
 #[repr(C)]
@@ -21,7 +22,7 @@ pub enum ModuleKind {
 /// Module information
 #[derive(Clone)]
 #[repr(C)]
-pub struct ModuleInfo {
+pub struct LibInfo {
     pub api_version: std_types::Uint,
     pub id: std_types::ConstCharPtr,
     pub kind: ModuleKind,
@@ -42,6 +43,30 @@ pub enum PipelineModuleKind {
     Destination,
 }
 
+#[repr(C)]
+#[derive(Clone)]
+pub struct LibCommonInitArgs {
+    pub on_step_terminate_cb: ModuleTerminationHandlerFn,
+}
+
+/// Arguments passed to initialization function of pipeline library
+#[repr(C)]
+#[derive(Clone)]
+pub struct LibPipelineInitArgs {
+    pub common: LibCommonInitArgs,
+    pub on_data_receive_cb: ModuleOnDataReceiveCb,
+    pub create_record_ptr_fn: fn_defs::ModuleNewRecordPtrFn,
+    pub free_record_ptr_fn: fn_defs::ModuleFreeRecordPtrFn,
+}
+
+/// Arguments passed to initialization function of listener library
+#[repr(C)]
+#[derive(Clone)]
+pub struct LibListenerInitArgs {
+    pub common: LibCommonInitArgs,
+}
+
+
 /// Arguments passed to init function for listener module
 #[repr(C)]
 #[derive(Clone)]
@@ -49,14 +74,12 @@ pub struct ModuleListenerConfigureArgs {
     pub module_handle: ModuleHandle,
 }
 
-/// Arguments passed to init function for pipeline module
+/// Arguments passed to configuration function of module
 #[repr(C)]
 #[derive(Clone)]
 pub struct ModulePipelineConfigureArgs {
     pub kind: PipelineModuleKind,
     pub module_handle: ModuleHandle,
-    pub on_step_terminate_cb: ModuleTerminationHandlerFn,
-    pub on_data_receive_cb: ModuleOnDataReceiveCb,
 }
 
 /// Record metadata. Each item is a key-value pair + a reference to the next record
@@ -119,6 +142,20 @@ impl Record {
 
     pub fn get_content_len(&self) -> usize {
         self.content.len
+    }
+}
+
+// TODO: convert the pipeline to these pointers
+pub extern "C" fn new_record_as_raw_ptr() -> *mut Record {
+    Box::into_raw(Box::new(Record {
+        content: ByteBuffer::from(String::new()),
+        metadata: Array::from_vec(Vec::new()),
+    }))
+}
+
+pub extern "C"  fn free_record_ptr(r: *mut Record) {
+    unsafe {
+        let _ = Box::from_raw(r);
     }
 }
 

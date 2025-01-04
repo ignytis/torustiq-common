@@ -8,7 +8,7 @@ include_guard = "_TORUSTIQ_COMMON_H_"
 
 
 include = [
-    "ModuleInfo",
+    "LibInfo",
     "ModulePipelineConfigureArgs", "ModulePipelineConfigureFnResult",
 
     "StepStartFnResult",
