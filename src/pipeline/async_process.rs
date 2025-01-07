@@ -2,8 +2,6 @@ use std::{collections::HashMap, sync::{mpsc::{Receiver, Sender, channel}, Mutex}
 use once_cell::sync::Lazy;
 use crate::ffi::types::module::{ModuleHandle, ModulePipelineProcessRecordFnResult, Record};
 
-use log::debug;
-
 pub static RECORD_SENDERS: Lazy<Mutex<HashMap<ModuleHandle, Sender<Record>>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
