@@ -1,21 +1,10 @@
 use crate::ffi::types::std_types;
 
-use super::traits::ShallowCopy;
-
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Array<T> {
     pub data: *mut T,
     pub len: std_types::Uint,
-}
-
-impl<T> ShallowCopy for Array<T> {
-    fn shallow_copy(&self) -> Self {
-        Array {
-            data: self.data,
-            len: self.len,
-        }
-    }
 }
 
 impl<T> Array<T> {
@@ -37,12 +26,13 @@ impl<T> Array<T> {
         std::mem::forget(boxed_slice);
         arr
     }
-}
 
-pub fn free_array<T>(arr: Array<T>) {
-    let s = unsafe { std::slice::from_raw_parts_mut(arr.data, arr.len as usize) };
-    let s = s.as_mut_ptr();
-    unsafe {
-        let _ = Box::from_raw(s);
+    pub fn free_contents(&mut self) {
+        let s = unsafe { std::slice::from_raw_parts_mut(self.data, self.len as usize) };
+        let s = s.as_mut_ptr();
+        unsafe {
+            let _ = Box::from_raw(s);
+        }
+        self.len = 0;
     }
 }

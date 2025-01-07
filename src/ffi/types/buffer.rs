@@ -1,8 +1,7 @@
 use crate::ffi::utils::strings::bytes_to_string_safe;
 
-use super::traits::ShallowCopy;
-
 #[repr(C)]
+#[derive(Copy)]
 pub struct ByteBuffer {
     pub bytes: *mut u8,
     pub len: usize,
@@ -26,6 +25,11 @@ impl ByteBuffer {
         };
         dst
     }
+
+    pub fn free_contents(&mut self) {
+        let _ = unsafe { Box::from_raw(self.bytes) };
+        self.len = 0;
+    }
 }
 
 impl Clone for ByteBuffer {
@@ -37,15 +41,6 @@ impl Clone for ByteBuffer {
         ByteBuffer {
             len: self.len,
             bytes: ptr,
-        }
-    }
-}
-
-impl ShallowCopy for ByteBuffer {
-    fn shallow_copy(&self) -> Self {
-        ByteBuffer {
-            bytes: self.bytes,
-            len: self.len,
         }
     }
 }

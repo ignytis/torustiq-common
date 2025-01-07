@@ -5,9 +5,7 @@ use crate::ffi::{
     utils::strings::{cchar_to_string, string_to_cchar}
 };
 
-use super::{buffer::ByteBuffer, collections::Array, functions::{
-    ModuleOnDataReceiveCb, ModuleTerminationHandlerFn
-}, traits::ShallowCopy};
+use super::{buffer::ByteBuffer, collections::Array};
 use crate::ffi::types::functions as fn_defs;
 
 #[derive(Clone)]
@@ -46,7 +44,7 @@ pub enum PipelineModuleKind {
 #[repr(C)]
 #[derive(Clone)]
 pub struct LibCommonInitArgs {
-    pub on_step_terminate_cb: ModuleTerminationHandlerFn,
+    pub on_step_terminate_cb: fn_defs::ModuleTerminationHandlerFn,
 }
 
 /// Arguments passed to initialization function of pipeline library
@@ -54,9 +52,7 @@ pub struct LibCommonInitArgs {
 #[derive(Clone)]
 pub struct LibPipelineInitArgs {
     pub common: LibCommonInitArgs,
-    pub on_data_receive_cb: ModuleOnDataReceiveCb,
-    pub create_record_ptr_fn: fn_defs::ModuleNewRecordPtrFn,
-    pub free_record_ptr_fn: fn_defs::ModuleFreeRecordPtrFn,
+    pub on_data_receive_cb: fn_defs::ModuleOnDataReceiveCb,
 }
 
 /// Arguments passed to initialization function of listener library
@@ -84,7 +80,7 @@ pub struct ModulePipelineConfigureArgs {
 
 /// Record metadata. Each item is a key-value pair + a reference to the next record
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct RecordMetadata {
     pub name : std_types::ConstCharPtr,
     pub value: std_types::ConstCharPtr,
@@ -101,22 +97,13 @@ impl From<(String, String)> for RecordMetadata {
 
 /// A single piece of data to transmit. Contains the data itself + metadata
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Record {
     pub content: ByteBuffer,
     pub metadata: Array<RecordMetadata>,
 }
 
 unsafe impl Send for Record {}
-
-impl ShallowCopy for Record {
-    fn shallow_copy(&self) -> Self {
-        Self {
-            content: self.content.shallow_copy(),
-            metadata: self.metadata.shallow_copy(),
-        }
-    }
-}
 
 impl Record {
     /// Creates a record from standard types: content (vector of bytes)
@@ -143,19 +130,10 @@ impl Record {
     pub fn get_content_len(&self) -> usize {
         self.content.len
     }
-}
 
-// TODO: convert the pipeline to these pointers
-pub extern "C" fn new_record_as_raw_ptr() -> *mut Record {
-    Box::into_raw(Box::new(Record {
-        content: ByteBuffer::from(String::new()),
-        metadata: Array::from_vec(Vec::new()),
-    }))
-}
-
-pub extern "C"  fn free_record_ptr(r: *mut Record) {
-    unsafe {
-        let _ = Box::from_raw(r);
+    pub fn free_contents(&mut self) {
+        self.content.free_contents();
+        self.metadata.free_contents();
     }
 }
 
@@ -196,10 +174,15 @@ pub enum StepStartFnResult {
 }
 
 /// A result of sending a record to further processing
+/// For all options the last Boolean argument specifies if the record
+/// was consumed (i.e. passed forward to other modules)
+/// If the record wasn't consumed, it has to be deallocated
 #[repr(C)]
 pub enum ModulePipelineProcessRecordFnResult {
     /// Processing succeeded. No immediate error occurred
-    Ok,
+    Ok(bool),
+    ///
+    ErrWrongModuleHandle(ModuleHandle, bool),
     /// Cannot proces record due to error
-    Err(std_types::ConstCharPtr),
+    ErrMisc(std_types::ConstCharPtr, bool),
 }
